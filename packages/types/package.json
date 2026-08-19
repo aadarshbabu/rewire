@@ -1,0 +1,11 @@
+{
+    "name": "@rewire/types",
+    "version": "0.0.0",
+    "private": true,
+    "exports": {
+        ".": "./src/index.ts"
+    },
+    "devDependencies": {
+        "@types/node": "^22"
+    }
+}
