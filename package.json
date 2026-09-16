@@ -1,4 +1,7 @@
 {
+  "dependencies": {
+    "@nestjs/mapped-types": "*"
+  },
   "name": "rewire",
   "private": true,
   "scripts": {
@@ -11,5 +14,14 @@
   "packageManager": "pnpm@10.26.2",
   "devDependencies": {
     "turbo": "latest"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "prisma",
+      "@prisma/client",
+      "@prisma/engines",
+      "unrs-resolver",
+      "better-sqlite3"
+    ]
   }
 }

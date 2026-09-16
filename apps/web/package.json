@@ -9,13 +9,29 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@aws-sdk/client-sqs": "^3.1127.0",
+    "@rewire/database": "workspace:*",
     "@rewire/types": "workspace:*",
+    "@rewire/validation": "workspace:*",
+    "@tanstack/react-query": "^5",
+    "@trpc/client": "^11",
+    "@trpc/server": "^11",
+    "@trpc/tanstack-react-query": "^11",
+    "better-auth": "^1.7.1",
+    "client-only": "^0.0.1",
+    "ioredis": "^6.0.0",
+    "lucide-react": "^1.33.0",
     "next": "16.3.1",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
+    "server-only": "^0.0.1",
+    "zod": "^3.24"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/ioredis": "^5.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
