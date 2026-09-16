@@ -1,0 +1,166 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Rewire AI Worker - Production-grade AWS SAM template for SQS-triggered 
+  scale-to-zero serverless AI worker running on AWS Lambda.
+
+# ----------------------------------------------------------------------
+# Global Function Configurations
+# ----------------------------------------------------------------------
+Globals:
+  Function:
+    Timeout: 60
+    MemorySize: 1024
+    Runtime: nodejs24.x
+    Architectures:
+      - arm64 # Graviton2: ~20% cheaper and better compute performance
+    Tracing: Active # AWS X-Ray tracing enabled
+    LoggingConfig:
+      LogFormat: JSON
+      ApplicationLogLevel: INFO
+
+# ----------------------------------------------------------------------
+# Parameters
+# ----------------------------------------------------------------------
+Parameters:
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues: [development, staging, production]
+    Description: Environment stage name
+
+  DatabaseUrl:
+    Type: String
+    NoEcho: true
+    Description: PostgreSQL connection string (Supabase / RDS / Neon)
+
+  RedisUrl:
+    Type: String
+    NoEcho: true
+    Description: Redis connection string (Upstash / ElastiCache)
+
+  MistralApiKey:
+    Type: String
+    NoEcho: true
+    Description: Mistral AI API Key
+
+  Neo4jUri:
+    Type: String
+    Description: Neo4j Bolt/Neo4j+s URI (AuraDB / self-hosted)
+
+  Neo4jPassword:
+    Type: String
+    NoEcho: true
+    Description: Neo4j database password
+
+  MaxWorkerConcurrency:
+    Type: Number
+    Default: 20
+    Description: Maximum concurrent Lambda invocations triggered by SQS (protects downstream DB and LLM rate limits)
+
+# ----------------------------------------------------------------------
+# Resources
+# ----------------------------------------------------------------------
+Resources:
+  # 1. Dead-Letter Queue (DLQ)
+  # Poison-pill or repeatedly failing messages land here for inspection
+  AiJobDeadLetterQueue:
+    Type: AWS::SQS::Queue
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      QueueName: !Sub "rewire-ai-jobs-dlq-${Environment}"
+      MessageRetentionPeriod: 1209600 # Retain for 14 days (maximum)
+      KmsMasterKeyId: alias/aws/sqs # Server-side encryption at rest
+
+  # 2. Main SQS Job Queue
+  AiJobQueue:
+    Type: AWS::SQS::Queue
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      QueueName: !Sub "rewire-ai-jobs-${Environment}"
+      # CRITICAL: VisibilityTimeout MUST be >= 6 * Lambda Timeout (6 * 60s = 360s)
+      VisibilityTimeout: 360
+      MessageRetentionPeriod: 86400 # 1 day
+      KmsMasterKeyId: alias/aws/sqs
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt AiJobDeadLetterQueue.Arn
+        maxReceiveCount: 3 # Route to DLQ after 3 failed attempts
+
+  # 3. CloudWatch Log Group with explicit retention (prevents eternal log cost)
+  AiWorkerLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/rewire-ai-worker-${Environment}"
+      RetentionInDays: 30
+
+  # 4. NestJS AI Worker Lambda Function
+  AiWorkerFunction:
+    Type: AWS::Serverless::Function
+    DependsOn: AiWorkerLogGroup
+    Properties:
+      FunctionName: !Sub "rewire-ai-worker-${Environment}"
+      CodeUri: .
+      Handler: dist/lambda.handler
+      Description: "NestJS LangGraph AI Worker triggered by SQS"
+      Environment:
+        Variables:
+          NODE_ENV: !Ref Environment
+          DATABASE_URL: !Ref DatabaseUrl
+          REDIS_URL: !Ref RedisUrl
+          MISTRAL_API_KEY: !Ref MistralApiKey
+          NEO4J_URI: !Ref Neo4jUri
+          NEO4J_USER: neo4j
+          NEO4J_PASSWORD: !Ref Neo4jPassword
+          LANGSMITH_TRACING: "false" # Set to "true" in production if using LangSmith
+          LANGSMITH_PROJECT: !Sub "rewire-${Environment}"
+      
+      # AUTOMATIC LEAST-PRIVILEGE IAM PERMISSION:
+      # SAM's SQSPollerPolicy automatically provisions:
+      # - sqs:ReceiveMessage
+      # - sqs:DeleteMessage
+      # - sqs:GetQueueAttributes
+      Policies:
+        - SQSPollerPolicy:
+            QueueName: !GetAtt AiJobQueue.QueueName
+
+      # EVENT SOURCE MAPPING (SQS -> Lambda Trigger)
+      Events:
+        SqsJobTrigger:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt AiJobQueue.Arn
+            # BatchSize: 1 ensures each AI generation runs isolated in its own invocation
+            BatchSize: 1
+            Enabled: true
+            # Controls concurrency to avoid exceeding LLM API rate limits
+            ScalingConfig:
+              MaximumConcurrency: !Ref MaxWorkerConcurrency
+            # Granular failure reporting
+            FunctionResponseTypes:
+              - ReportBatchItemFailures
+
+# ----------------------------------------------------------------------
+# Outputs (Exported values for Next.js and deployment scripts)
+# ----------------------------------------------------------------------
+Outputs:
+  QueueUrl:
+    Description: "SQS Queue URL (configure as AWS_SQS_QUEUE_URL in apps/web)"
+    Value: !Ref AiJobQueue
+    Export:
+      Name: !Sub "${AWS::StackName}-QueueUrl"
+
+  QueueArn:
+    Description: "ARN of the main SQS Queue"
+    Value: !GetAtt AiJobQueue.Arn
+
+  DeadLetterQueueUrl:
+    Description: "Dead-Letter Queue URL for inspecting failed AI jobs"
+    Value: !Ref AiJobDeadLetterQueue
+
+  LambdaFunctionArn:
+    Description: "ARN of the AI Worker Lambda Function"
+    Value: !GetAtt AiWorkerFunction.Arn

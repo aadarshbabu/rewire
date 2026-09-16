@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "aiven": {
+      "serverUrl": "https://mcp.aiven.live/mcp"
+    }
+  }
+}
