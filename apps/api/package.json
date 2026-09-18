@@ -7,6 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
+    "build:lambda": "nest build && node scripts/build-lambda.mjs",
     "dev": "nest start --watch",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -21,7 +22,6 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "seed:neo4j": "ts-node -r tsconfig-paths/register src/modules/neo4j/seed/run-seed.ts"
   },
-
   "dependencies": {
     "@aws-sdk/client-sqs": "^3.1127.0",
     "@langchain/core": "^1.2.9",
@@ -51,6 +51,7 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^24.0.0",
     "@types/supertest": "^7.0.0",
+    "esbuild": "^0.28.2",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",

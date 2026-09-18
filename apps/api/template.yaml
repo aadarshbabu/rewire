@@ -44,9 +44,19 @@ Parameters:
     NoEcho: true
     Description: Mistral AI API Key
 
+  MistralModel:
+    Type: String
+    Default: "mistral-large-latest"
+    Description: Mistral AI Model name (e.g., mistral-large-latest, open-mistral-7b)
+
   Neo4jUri:
     Type: String
     Description: Neo4j Bolt/Neo4j+s URI (AuraDB / self-hosted)
+
+  Neo4jUsername:
+    Type: String
+    Default: "98633679"
+    Description: Neo4j database username
 
   Neo4jPassword:
     Type: String
@@ -112,8 +122,10 @@ Resources:
           DATABASE_URL: !Ref DatabaseUrl
           REDIS_URL: !Ref RedisUrl
           MISTRAL_API_KEY: !Ref MistralApiKey
+          MISTRAL_MODEL: !Ref MistralModel
           NEO4J_URI: !Ref Neo4jUri
-          NEO4J_USER: neo4j
+          NEO4J_USERNAME: !Ref Neo4jUsername
+          NEO4J_USER: !Ref Neo4jUsername
           NEO4J_PASSWORD: !Ref Neo4jPassword
           LANGSMITH_TRACING: "false" # Set to "true" in production if using LangSmith
           LANGSMITH_PROJECT: !Sub "rewire-${Environment}"
@@ -142,6 +154,8 @@ Resources:
             # Granular failure reporting
             FunctionResponseTypes:
               - ReportBatchItemFailures
+    Metadata:
+      BuildMethod: makefile
 
 # ----------------------------------------------------------------------
 # Outputs (Exported values for Next.js and deployment scripts)

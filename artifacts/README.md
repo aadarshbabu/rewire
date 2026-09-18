@@ -27,9 +27,12 @@ artifacts/
 ├── 06-mental-reframing-offloading/
 │   ├── implementation_plan.md               # Implementation Plan: Brain dumping & reframing nodes
 │   └── walkthrough.md                       # Walkthrough: Reframing pipeline & node separation
-└── 07-neo4j-graph-dynamic-insights/
-    ├── implementation_plan.md               # Implementation Plan: Neo4j seed & cognitive insights
-    └── walkthrough.md                       # Walkthrough: Graph schema, Cypher seed & dynamic insights
+├── 07-neo4j-graph-dynamic-insights/
+│   ├── implementation_plan.md               # Implementation Plan: Neo4j seed & cognitive insights
+│   └── walkthrough.md                       # Walkthrough: Graph schema, Cypher seed & dynamic insights
+└── 08-aws-sam-lambda-deployment/
+    ├── aws_sam_monorepo_build_guide.md      # AWS SAM Lambda Monorepo Build Architecture Guide
+    └── aws_iam_permissions_guide.md         # AWS IAM Permissions & CloudFormation Troubleshooting Guide
 ```
 
 ---
@@ -77,3 +80,11 @@ artifacts/
 - **Artifacts**:
   - [implementation_plan.md](file:///Volumes/CobletSSD/ProjectsSourceCode/rewire/artifacts/07-neo4j-graph-dynamic-insights/implementation_plan.md)
   - [walkthrough.md](file:///Volumes/CobletSSD/ProjectsSourceCode/rewire/artifacts/07-neo4j-graph-dynamic-insights/walkthrough.md)
+
+### Phase 8: AWS SAM Lambda Deployment & Custom Monorepo Build
+- **Focus**: Resolving `sam build` in a pnpm/Turborepo monorepo, configuring `Metadata: BuildMethod: makefile`, bypassing the `workspace:*` npm protocol error, preserving NestJS decorator metadata, and packaging a sub-20MB Lambda artifact.
+- **Artifacts**:
+  - [aws_sam_monorepo_build_guide.md](file:///Volumes/CobletSSD/ProjectsSourceCode/rewire/artifacts/08-aws-sam-lambda-deployment/aws_sam_monorepo_build_guide.md)
+  - [aws_iam_permissions_guide.md](file:///Volumes/CobletSSD/ProjectsSourceCode/rewire/artifacts/08-aws-sam-lambda-deployment/aws_iam_permissions_guide.md)
+
+

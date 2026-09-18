@@ -9,7 +9,13 @@
     "build": "turbo build",
     "lint": "turbo lint",
     "test": "turbo test",
-    "typecheck": "turbo typecheck"
+    "typecheck": "turbo typecheck",
+    "sam:build": "pnpm --filter @rewire/api exec sam build",
+    "sam:validate": "pnpm --filter @rewire/api exec sam validate --lint",
+    "sam:deploy": "pnpm --filter @rewire/api exec sam deploy",
+    "sam:deploy:prod": "pnpm --filter @rewire/api exec sam deploy --config-env production",
+    "sam:local": "pnpm --filter @rewire/api exec sam local invoke AiWorkerFunction",
+    "sam:logs": "pnpm --filter @rewire/api exec sam logs --stack-name rewire-ai-stack --tail"
   },
   "packageManager": "pnpm@10.26.2",
   "devDependencies": {
