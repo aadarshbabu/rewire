@@ -1,0 +1,38 @@
+# Cache and local build directories
+.turbo
+.next
+dist
+build
+out
+
+# Backend API (AWS SAM / Lambda - not deployed to Vercel)
+apps/api
+
+# Dependencies
+node_modules
+.pnpm-store
+
+# Local secrets & env files
+.env*
+!.env.example
+creds
+
+# IDE, documentation & AI assistant metadata
+.agents
+.vscode
+.idea
+artifacts
+*.md
+!README.md
+
+# AWS SAM
+.aws-sam
+samconfig.toml
+
+# Docker & miscellaneous
+docker
+*.local
+*.log
+*.db
+*.tsbuildinfo
+.DS_Store

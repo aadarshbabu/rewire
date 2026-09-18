@@ -15,8 +15,17 @@
     "sam:deploy": "pnpm --filter @rewire/api exec sam deploy",
     "sam:deploy:prod": "pnpm --filter @rewire/api exec sam deploy --config-env production",
     "sam:local": "pnpm --filter @rewire/api exec sam local invoke AiWorkerFunction",
-    "sam:logs": "pnpm --filter @rewire/api exec sam logs --stack-name rewire-ai-stack --tail"
+    "sam:logs": "pnpm --filter @rewire/api exec sam logs --stack-name rewire-ai-stack --tail",
+    "vercel:link": "vercel link",
+    "vercel:deploy": "vercel",
+    "vercel:deploy:prod": "vercel --prod",
+    "vercel:env:push:prod": "node scripts/vercel-env-sync.mjs --env=production",
+    "vercel:env:push:preview": "node scripts/vercel-env-sync.mjs --env=preview",
+    "vercel:env:pull:prod": "vercel env pull apps/web/.env.production.local --environment=production --yes",
+    "vercel:env:pull:preview": "vercel env pull apps/web/.env.preview.local --environment=preview --yes",
+    "vercel:env:ls": "vercel env ls"
   },
+
   "packageManager": "pnpm@10.26.2",
   "devDependencies": {
     "turbo": "latest"

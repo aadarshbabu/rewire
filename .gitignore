@@ -75,3 +75,10 @@ samconfig.toml
 
 packages/database/prisma/dev.db
 creds
+
+# ========================
+# Vercel
+# ========================
+.vercel/
+.vercel
+.env*
