@@ -29,11 +29,14 @@ artifacts/
 │   └── walkthrough.md                       # Walkthrough: Reframing pipeline & node separation
 ├── 07-neo4j-graph-dynamic-insights/
 │   ├── implementation_plan.md               # Implementation Plan: Neo4j seed & cognitive insights
-│   └── walkthrough.md                       # Walkthrough: Graph schema, Cypher seed & dynamic insights
-└── 08-aws-sam-lambda-deployment/
-    ├── aws_sam_monorepo_build_guide.md      # AWS SAM Lambda Monorepo Build Architecture Guide
-    └── aws_iam_permissions_guide.md         # AWS IAM Permissions & CloudFormation Troubleshooting Guide
+├── 08-aws-sam-lambda-deployment/
+│   ├── aws_sam_monorepo_build_guide.md      # AWS SAM Lambda Monorepo Build Architecture Guide
+│   └── aws_iam_permissions_guide.md         # AWS IAM Permissions & CloudFormation Troubleshooting Guide
+└── 09-vercel-deployment-plan/
+    ├── turborepo-vercel-deployment-strategy.md # Vercel CI/CD Deployment & Turborepo Optimization Guide
+    └── walkthrough.md                       # Verification & setup walkthrough
 ```
+
 
 ---
 
@@ -86,5 +89,11 @@ artifacts/
 - **Artifacts**:
   - [aws_sam_monorepo_build_guide.md](file:///Volumes/CobletSSD/ProjectsSourceCode/rewire/artifacts/08-aws-sam-lambda-deployment/aws_sam_monorepo_build_guide.md)
   - [aws_iam_permissions_guide.md](file:///Volumes/CobletSSD/ProjectsSourceCode/rewire/artifacts/08-aws-sam-lambda-deployment/aws_iam_permissions_guide.md)
+
+### Phase 9: Vercel CI/CD Deployment & Turborepo Optimization
+- **Focus**: Configuring automated Git-driven deployments (PRs -> Preview, `main` -> Production), setting up `turbo-ignore` to skip builds when only backend `apps/api` changes, configuring Root Directory to `apps/web` with monorepo dependency builds, reducing upload size from 1.7 GB to ~722 KB with `.vercelignore`, and automating environment variable synchronization.
+- **Artifacts**:
+  - [turborepo-vercel-deployment-strategy.md](file:///Volumes/CobletSSD/ProjectsSourceCode/rewire/artifacts/09-vercel-deployment-plan/turborepo-vercel-deployment-strategy.md)
+  - [walkthrough.md](file:///Volumes/CobletSSD/ProjectsSourceCode/rewire/artifacts/09-vercel-deployment-plan/walkthrough.md)
 
 
