@@ -162,7 +162,7 @@ flowchart TD
 ```json
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "ignoreCommand": "npx -y turbo-ignore"
+  "ignoreCommand": "if [ \"$VERCEL_GIT_COMMIT_REF\" != \"preview\" ] && [ \"$VERCEL_GIT_COMMIT_REF\" != \"main\" ]; then exit 0; else npx -y turbo-ignore; fi"
 }
 ```
 
