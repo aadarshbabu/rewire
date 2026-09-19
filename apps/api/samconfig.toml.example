@@ -1,18 +1,45 @@
+# ==============================================================================
+# AWS SAM Configuration File (samconfig.toml.example)
+# Copy this file to `samconfig.toml` and fill in your environment parameters.
+# ==============================================================================
 version = 0.1
 
+# --- Global Parameters ---
 [default.global.parameters]
 stack_name = "rewire-ai-stack"
 
+# --- Build Parameters ---
 [default.build.parameters]
 cached = true
 parallel = true
 
+# --- Validate Parameters ---
+[default.validate.parameters]
+lint = true
+
+# --- Package Parameters ---
+[default.package.parameters]
+resolve_s3 = true
+s3_prefix = "rewire-ai-worker"
+
+# --- Deploy Parameters (Default Profile) ---
 [default.deploy.parameters]
 capabilities = "CAPABILITY_IAM"
 confirm_changeset = true
+fail_on_empty_changeset = false
+disable_rollback = false
 resolve_s3 = true
 s3_prefix = "rewire-ai-worker"
-region = "us-east-1"
+region = "ap-south-1"
+
+# Resource Tags for Cost Allocation & Observability
+tags = [
+  "Project=\"rewire\"",
+  "Service=\"ai-worker\"",
+  "Environment=\"production\"",
+  "ManagedBy=\"AWS-SAM\""
+]
+
 parameter_overrides = [
   "Environment=\"production\"",
   "DatabaseUrl=\"postgresql://user:password@host:5432/dbname?sslmode=require\"",
@@ -22,3 +49,38 @@ parameter_overrides = [
   "Neo4jPassword=\"your-neo4j-password\"",
   "MaxWorkerConcurrency=20"
 ]
+
+# --- Production Profile (sam deploy --config-env production) ---
+[production.deploy.parameters]
+stack_name = "rewire-ai-stack-production"
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = true
+fail_on_empty_changeset = false
+disable_rollback = false
+resolve_s3 = true
+s3_prefix = "rewire-ai-worker/production"
+region = "ap-south-1"
+
+tags = [
+  "Project=\"rewire\"",
+  "Service=\"ai-worker\"",
+  "Environment=\"production\"",
+  "ManagedBy=\"AWS-SAM\""
+]
+
+parameter_overrides = [
+  "Environment=\"production\"",
+  "DatabaseUrl=\"postgresql://user:password@host:5432/dbname?sslmode=require\"",
+  "RedisUrl=\"rediss://default:password@host:6379\"",
+  "MistralApiKey=\"your-mistral-api-key\"",
+  "Neo4jUri=\"neo4j+s://your-instance.databases.neo4j.io\"",
+  "Neo4jPassword=\"your-neo4j-password\"",
+  "MaxWorkerConcurrency=20"
+]
+
+# --- Local & Sync Parameters (For Development & Testing) ---
+[default.sync.parameters]
+watch = true
+
+[default.local_invoke.parameters]
+warm_containers = "EAGER"

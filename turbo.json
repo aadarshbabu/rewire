@@ -1,33 +1,58 @@
 {
-    "$schema": "https://turbo.build/schema.json",
-    "tasks": {
-        "dev": {
-            "cache": false,
-            "persistent": true
-        },
-        "build": {
-            "dependsOn": [
-                "^build"
-            ],
-            "outputs": [
-                ".next/**",
-                "dist/**"
-            ]
-        },
-        "lint": {
-            "dependsOn": [
-                "^lint"
-            ]
-        },
-        "test": {
-            "dependsOn": [
-                "^test"
-            ]
-        },
-        "typecheck": {
-            "dependsOn": [
-                "^typecheck"
-            ]
-        }
+  "$schema": "https://turbo.build/schema.json",
+  "globalPassThroughEnv": [
+    "NODE_ENV",
+    "PORT",
+    "DATABASE_URL",
+    "REDIS_URL",
+    "REDIS_HOST",
+    "REDIS_PORT",
+    "REDIS_PASSWORD",
+    "NEO4J_URI",
+    "NEO4J_USERNAME",
+    "NEO4J_PASSWORD",
+    "AI_WORKER_URL",
+    "BETTER_AUTH_SECRET",
+    "BETTER_AUTH_URL",
+    "NEXT_PUBLIC_APP_URL",
+    "MISTRAL_API_KEY",
+    "MISTRAL_MODEL",
+    "AWS_SQS_QUEUE_URL",
+    "AWS_REGION",
+    "ENABLE_LOCAL_SQS_POLLER",
+    "LANGSMITH_TRACING",
+    "LANGSMITH_ENDPOINT",
+    "LANGSMITH_API_KEY",
+    "LANGSMITH_PROJECT"
+  ],
+  "tasks": {
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        ".next/**",
+        "dist/**"
+      ]
+    },
+    "lint": {
+      "dependsOn": [
+        "^lint"
+      ]
+    },
+    "test": {
+      "dependsOn": [
+        "^test"
+      ]
+    },
+    "typecheck": {
+      "dependsOn": [
+        "^typecheck"
+      ]
     }
+  }
 }

@@ -19,6 +19,7 @@ out/
 .env
 .env.*
 !.env.example
+!.env*.example
 
 # ========================
 # TypeScript
@@ -55,6 +56,9 @@ Thumbs.db
 *.swp
 *.swo
 *~
+.claude/
+.windsurf/
+.cursor/
 
 # ========================
 # Misc
@@ -70,3 +74,11 @@ samconfig.toml
 
 
 packages/database/prisma/dev.db
+creds
+
+# ========================
+# Vercel
+# ========================
+.vercel/
+.vercel
+.env*

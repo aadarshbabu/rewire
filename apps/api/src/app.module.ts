@@ -13,6 +13,14 @@ import { QueueModule } from './modules/queue/queue.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: process.env.NODE_ENV
+        ? [
+            `.env.${process.env.NODE_ENV}.local`,
+            `.env.${process.env.NODE_ENV}`,
+            '.env.local',
+            '.env',
+          ]
+        : ['.env.development.local', '.env.local', '.env.development', '.env'],
     }),
     DatabaseModule,
     Neo4jModule,
