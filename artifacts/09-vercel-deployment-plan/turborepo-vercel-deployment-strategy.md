@@ -246,3 +246,91 @@ pnpm vercel:env:pull:preview
 | `vercel project inspect rewire-web` | Inspect current Vercel Cloud project settings |
 | `git push origin <branch>` | Automated Git-triggered Preview deployment |
 | `git push origin main` | Automated Git-triggered Production deployment |
+
+---
+
+## 8. Better Auth Trusted Origins & Custom Domain Configuration
+
+### 8.1 Why `trustedOrigins` Matters in Better Auth
+
+Better Auth implements built-in **CSRF Protection** and **Origin Header Validation**. When a user signs in or registers (`/api/auth/sign-in/email`, `/api/auth/sign-up/email`), Better Auth verifies the incoming HTTP `Origin` header against:
+1. `auth.options.baseURL` (or the `BETTER_AUTH_URL` environment variable).
+2. The `trustedOrigins` array.
+
+If the incoming request domain is not in this whitelist, Better Auth immediately returns **`403 Forbidden`** with an **`INVALID_ORIGIN`** error code.
+
+### 8.2 Dynamic Resolution for Vercel Preview & Production
+
+Because Vercel Preview deployments use dynamic URLs (e.g. `rewire-web-git-preview-*.vercel.app`), [apps/web/lib/auth.ts](file:///Volumes/CobletSSD/ProjectsSourceCode/rewire/apps/web/lib/auth.ts) is configured to dynamically resolve `baseURL` and whitelist all relevant origins:
+
+```ts
+const getBaseURL = () => {
+  // Production custom domain configured via BETTER_AUTH_URL
+  if (process.env.VERCEL_ENV === "production" && process.env.BETTER_AUTH_URL && !process.env.BETTER_AUTH_URL.includes("localhost")) {
+    return process.env.BETTER_AUTH_URL;
+  }
+  // Vercel Preview & auto-generated URLs
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return process.env.BETTER_AUTH_URL || "http://localhost:3000";
+};
+
+export const auth = betterAuth({
+  baseURL: getBaseURL(),
+  database: prismaAdapter(db, {
+    provider: "postgresql",
+  }),
+  emailAndPassword: {
+    enabled: true,
+    minPasswordLength: 8,
+    autoSignIn: true,
+  },
+  trustedOrigins: [
+    "http://localhost:3000",
+    "https://*.vercel.app",
+    ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
+    ...(process.env.BETTER_AUTH_URL ? [process.env.BETTER_AUTH_URL] : []),
+    ...(process.env.NEXT_PUBLIC_APP_URL ? [process.env.NEXT_PUBLIC_APP_URL] : []),
+    ...(process.env.BETTER_AUTH_TRUSTED_ORIGINS
+      ? process.env.BETTER_AUTH_TRUSTED_ORIGINS.split(",").map((o) => o.trim())
+      : []),
+  ],
+});
+```
+
+### 8.3 How to Add a Custom Domain in the Future
+
+When you attach your own custom domain (for example, `https://rewire.app` or `https://preview.rewire.app`):
+
+#### Method A: Via Environment Variables (Zero Code Changes - Recommended)
+1. In Vercel Project Settings > **Environment Variables**:
+   - Update `BETTER_AUTH_URL` for Production to your custom domain:
+     ```env
+     BETTER_AUTH_URL=https://rewire.app
+     NEXT_PUBLIC_APP_URL=https://rewire.app
+     ```
+   - If using multiple domains or subdomains (e.g., `app.rewire.app`, `preview.rewire.app`), set:
+     ```env
+     BETTER_AUTH_TRUSTED_ORIGINS=https://rewire.app,https://www.rewire.app,https://preview.rewire.app
+     ```
+2. Redeploy or trigger a Git push for the new environment variables to take effect.
+
+#### Method B: In Code via Wildcard ([apps/web/lib/auth.ts](file:///Volumes/CobletSSD/ProjectsSourceCode/rewire/apps/web/lib/auth.ts))
+You can add your root domain and all its subdomains directly to `trustedOrigins` using wildcards:
+```ts
+trustedOrigins: [
+  "http://localhost:3000",
+  "https://*.vercel.app",
+  "https://*.rewire.app", // Trusts all subdomains (preview.rewire.app, app.rewire.app, etc.)
+  "https://rewire.app",   // Root apex domain
+  // ...
+]
+```
+
+### 8.4 Critical Rules to Avoid "Invalid Origin"
+1. **Always Include Protocol**: Use `https://yourdomain.com`, **NOT** `yourdomain.com`.
+2. **No Trailing Slashes**: Use `https://yourdomain.com`, **NOT** `https://yourdomain.com/`.
+3. **Include Both Apex and Subdomain**: If you allow `www.rewire.app` and `rewire.app`, add both or use `https://*.rewire.app`.
+4. **Vercel Preview Branch Aliases**: If you assign a fixed Vercel domain to your `preview` branch (e.g. `preview.rewire.app`), ensure it is added to `BETTER_AUTH_TRUSTED_ORIGINS` or `trustedOrigins`.
+
