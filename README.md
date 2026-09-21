@@ -8,6 +8,9 @@ A full-stack, end-to-end type-safe TypeScript monorepo built with **Turborepo**,
 
 Rewire is an intelligent mental health platform architected as an **event-driven, decoupled monorepo**. It strictly isolates user-facing web interactions from computationally intensive, safety-governed AI workflows.
 
+## High level archicture.
+![archicture-digram](image.png)
+
 > 📖 **Full Architecture Specification**: For comprehensive sequence diagrams, LangGraph state machine topologies, and Architectural Decision Records (ADRs), read [**`ARCHITECTURE.md`**](ARCHITECTURE.md).
 
 ```
