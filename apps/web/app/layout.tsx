@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { TRPCReactProvider } from "@/trpc/client";
 import "./globals.css";
 
@@ -21,6 +22,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <TRPCReactProvider>{children}</TRPCReactProvider>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
