@@ -91,13 +91,13 @@ export function SignUpCard() {
     <div className="w-full max-w-md mx-auto">
       <div className="relative overflow-hidden rounded-2xl border border-zinc-200/80 bg-white/90 p-8 shadow-xl backdrop-blur-xl transition-all dark:border-zinc-800/80 dark:bg-zinc-900/90 dark:shadow-2xl dark:shadow-black/50">
         {/* Glow accent */}
-        <div className="pointer-events-none absolute -top-24 -right-24 h-48 w-48 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 blur-3xl dark:from-purple-500/10 dark:to-pink-500/10" />
-        <div className="pointer-events-none absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-gradient-to-tr from-indigo-500/20 to-blue-500/20 blur-3xl dark:from-indigo-500/10 dark:to-blue-500/10" />
+        <div className="pointer-events-none absolute -top-24 -right-24 h-48 w-48 rounded-full bg-gradient-to-br from-teal-500/20 to-emerald-500/15 blur-3xl dark:from-teal-500/10 dark:to-emerald-500/10" />
+        <div className="pointer-events-none absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-gradient-to-tr from-teal-500/15 to-emerald-500/20 blur-3xl dark:from-teal-500/10 dark:to-emerald-500/10" />
 
         <div className="relative">
           {/* Header */}
           <div className="mb-8 text-center">
-            <div className="mx-auto mb-3.5 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-tr from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/25">
+            <div className="mx-auto mb-3.5 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-tr from-teal-600 to-emerald-600 text-white shadow-lg shadow-teal-500/25">
               <ShieldCheck className="h-6 w-6" />
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
@@ -146,7 +146,7 @@ export function SignUpCard() {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="John Doe"
                   disabled={isLoading || success}
-                  className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 py-2.5 pr-4 pl-10 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-purple-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800 dark:bg-zinc-950/50 dark:text-zinc-100 dark:placeholder:text-zinc-600 dark:focus:border-purple-400 dark:focus:bg-zinc-900"
+                  className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 py-2.5 pr-4 pl-10 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-teal-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800 dark:bg-zinc-950/50 dark:text-zinc-100 dark:placeholder:text-zinc-600 dark:focus:border-teal-400 dark:focus:bg-zinc-900"
                 />
               </div>
             </div>
@@ -171,7 +171,7 @@ export function SignUpCard() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   disabled={isLoading || success}
-                  className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 py-2.5 pr-4 pl-10 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-purple-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800 dark:bg-zinc-950/50 dark:text-zinc-100 dark:placeholder:text-zinc-600 dark:focus:border-purple-400 dark:focus:bg-zinc-900"
+                  className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 py-2.5 pr-4 pl-10 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-teal-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800 dark:bg-zinc-950/50 dark:text-zinc-100 dark:placeholder:text-zinc-600 dark:focus:border-teal-400 dark:focus:bg-zinc-900"
                 />
               </div>
             </div>
@@ -196,7 +196,7 @@ export function SignUpCard() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Min. 8 characters"
                   disabled={isLoading || success}
-                  className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 py-2.5 pr-11 pl-10 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-purple-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800 dark:bg-zinc-950/50 dark:text-zinc-100 dark:placeholder:text-zinc-600 dark:focus:border-purple-400 dark:focus:bg-zinc-900"
+                  className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 py-2.5 pr-11 pl-10 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-teal-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800 dark:bg-zinc-950/50 dark:text-zinc-100 dark:placeholder:text-zinc-600 dark:focus:border-teal-400 dark:focus:bg-zinc-900"
                 />
                 <button
                   type="button"
@@ -233,7 +233,7 @@ export function SignUpCard() {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Re-enter password"
                   disabled={isLoading || success}
-                  className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 py-2.5 pr-4 pl-10 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-purple-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800 dark:bg-zinc-950/50 dark:text-zinc-100 dark:placeholder:text-zinc-600 dark:focus:border-purple-400 dark:focus:bg-zinc-900"
+                  className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 py-2.5 pr-4 pl-10 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-teal-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800 dark:bg-zinc-950/50 dark:text-zinc-100 dark:placeholder:text-zinc-600 dark:focus:border-teal-400 dark:focus:bg-zinc-900"
                 />
               </div>
             </div>
@@ -241,7 +241,7 @@ export function SignUpCard() {
             <button
               type="submit"
               disabled={isLoading || success}
-              className="group relative mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 py-2.5 px-4 text-sm font-semibold text-white shadow-md shadow-purple-500/20 transition-all duration-200 hover:from-purple-500 hover:to-pink-500 hover:shadow-lg hover:shadow-purple-500/30 focus:outline-none focus:ring-2 focus:ring-purple-500/50 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+              className="group relative mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 py-2.5 px-4 text-sm font-semibold text-white shadow-md shadow-teal-500/20 transition-all duration-200 hover:from-teal-500 hover:to-emerald-500 hover:shadow-lg hover:shadow-teal-500/30 focus:outline-none focus:ring-2 focus:ring-teal-500/50 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isLoading ? (
                 <>
@@ -263,7 +263,7 @@ export function SignUpCard() {
               Already have an account?{" "}
               <Link
                 href="/sign-in"
-                className="font-semibold text-purple-600 transition-colors hover:text-purple-500 dark:text-purple-400 dark:hover:text-purple-300"
+                className="font-semibold text-teal-600 transition-colors hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300"
               >
                 Sign in
               </Link>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Heart } from "lucide-react";
 
 export default function AuthLayout({
   children,
@@ -7,27 +7,32 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative min-h-screen flex flex-col justify-between bg-zinc-50 dark:bg-zinc-950 font-sans selection:bg-indigo-500 selection:text-white">
+    <div className="relative min-h-screen flex flex-col justify-between bg-zinc-50 dark:bg-zinc-950 font-sans selection:bg-teal-500 selection:text-white">
       {/* Background decoration */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-[40%] left-[20%] h-[600px] w-[600px] rounded-full bg-gradient-to-tr from-indigo-500/10 via-purple-500/10 to-pink-500/10 blur-[120px]" />
-        <div className="absolute -bottom-[30%] right-[10%] h-[500px] w-[500px] rounded-full bg-gradient-to-br from-blue-500/10 to-teal-500/10 blur-[120px]" />
+        <div className="absolute -top-[35%] left-1/2 -translate-x-1/2 h-[600px] w-[900px] rounded-full bg-gradient-to-b from-teal-500/15 via-emerald-500/10 to-transparent blur-3xl dark:from-teal-500/10 dark:via-emerald-500/5" />
+        <div className="absolute -bottom-[20%] right-[10%] h-[450px] w-[450px] rounded-full bg-gradient-to-tr from-teal-500/10 to-emerald-500/10 blur-[120px]" />
       </div>
 
       {/* Header */}
       <header className="relative z-10 w-full max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-sm font-medium text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors group"
+          className="inline-flex items-center gap-2 text-sm font-medium text-zinc-600 hover:text-teal-600 dark:text-zinc-400 dark:hover:text-teal-400 transition-colors group"
         >
           <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
           <span>Back to home</span>
         </Link>
         <Link
           href="/"
-          className="text-lg font-bold tracking-tight bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent"
+          className="inline-flex items-center gap-2.5 group"
         >
-          Rewire
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-teal-600 to-emerald-600 text-white shadow-md shadow-teal-500/20 group-hover:scale-105 transition-transform">
+            <Heart className="h-4 w-4" />
+          </div>
+          <span className="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+            Rewire
+          </span>
         </Link>
       </header>
 
