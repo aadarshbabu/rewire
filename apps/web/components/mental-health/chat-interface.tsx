@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { useRouter, useParams } from "next/navigation";
 import {
   Sparkles,
   Send,
@@ -12,15 +14,17 @@ import {
   Heart,
   Brain,
   MessageSquare,
-  AlertCircle,
   Copy,
   Check,
   RefreshCw,
   Clock,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import { CrisisModal } from "./crisis-modal";
 import { BreathingWidget } from "./breathing-widget";
 import { MarkdownRenderer } from "./markdown-renderer";
+import { UserButton } from "@/components/auth/user-button";
 import { useSession } from "@/lib/auth-client";
 
 interface Message {
@@ -63,15 +67,32 @@ const CONVERSATION_STARTERS = [
   },
 ];
 
-export function ChatInterface() {
+interface ChatInterfaceProps {
+  initialChatId?: string;
+}
+
+export function ChatInterface({ initialChatId }: ChatInterfaceProps = {}) {
+  const router = useRouter();
+  const params = useParams();
+  const routeChatId = (params?.chatId as string) || initialChatId;
+  const loadedConversationIdRef = useRef<string | null>(null);
+
   const { data: session } = useSession();
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
-  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(routeChatId || null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [activeStepText, setActiveStepText] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  // Responsive default: collapse sidebar on mobile
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      setIsSidebarOpen(false);
+    }
+  }, []);
 
   // Modals & Tools
   const [isCrisisModalOpen, setIsCrisisModalOpen] = useState(false);
@@ -103,9 +124,10 @@ export function ChatInterface() {
       const data = await res.json();
       if (data.conversations) {
         setConversations(data.conversations);
-        // If none selected, select first
-        if (!currentConversationId && data.conversations.length > 0) {
-          selectConversation(data.conversations[0].id);
+        // If landed on /chat without a specific conversation ID and user has past conversations:
+        // Automatically redirect to the latest conversation
+        if (!routeChatId && !currentConversationId && data.conversations.length > 0) {
+          router.replace(`/chat/${data.conversations[0].id}`);
         }
       }
     } catch (err) {
@@ -119,8 +141,8 @@ export function ChatInterface() {
     }
   }, [session?.user]);
 
-  // Select a conversation and load its messages
-  const selectConversation = async (id: string) => {
+  // Load a conversation and its messages
+  const loadConversationMessages = async (id: string) => {
     if (activeEventSourceRef.current) {
       activeEventSourceRef.current.close();
       activeEventSourceRef.current = null;
@@ -132,7 +154,12 @@ export function ChatInterface() {
     try {
       setIsLoading(true);
       const res = await fetch(`/api/conversations/${id}`);
-      if (!res.ok) return;
+      if (!res.ok) {
+        if (res.status === 404 || res.status === 403) {
+          router.replace("/chat");
+        }
+        return;
+      }
       const data = await res.json();
       if (data.conversation && data.conversation.messages) {
         setMessages(data.conversation.messages);
@@ -146,9 +173,42 @@ export function ChatInterface() {
     }
   };
 
+  // Synchronize when routeChatId changes
+  useEffect(() => {
+    if (routeChatId) {
+      if (loadedConversationIdRef.current !== routeChatId) {
+        loadedConversationIdRef.current = routeChatId;
+        loadConversationMessages(routeChatId);
+      }
+    } else {
+      loadedConversationIdRef.current = null;
+      setCurrentConversationId(null);
+      setMessages([]);
+    }
+  }, [routeChatId]);
+
+  // Select a conversation from sidebar
+  const handleSelectConversation = (id: string) => {
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      setIsSidebarOpen(false);
+    }
+    if (id === currentConversationId) return;
+    router.push(`/chat/${id}`);
+  };
+
   // Create a new conversation
   const handleCreateNewConversation = async () => {
     if (!session?.user) return;
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      setIsSidebarOpen(false);
+    }
+    if (activeEventSourceRef.current) {
+      activeEventSourceRef.current.close();
+      activeEventSourceRef.current = null;
+    }
+    setIsStreaming(false);
+    setActiveStepText(null);
+
     try {
       setIsLoading(true);
       const res = await fetch("/api/conversations", { method: "POST" });
@@ -157,7 +217,9 @@ export function ChatInterface() {
       if (data.conversation) {
         setConversations((prev) => [data.conversation, ...prev]);
         setCurrentConversationId(data.conversation.id);
+        loadedConversationIdRef.current = data.conversation.id;
         setMessages([]);
+        router.push(`/chat/${data.conversation.id}`);
       }
     } catch (err) {
       console.error("Failed to create conversation:", err);
@@ -172,14 +234,16 @@ export function ChatInterface() {
     try {
       const res = await fetch(`/api/conversations/${id}`, { method: "DELETE" });
       if (res.ok) {
-        setConversations((prev) => prev.filter((c) => c.id !== id));
+        const remaining = conversations.filter((c) => c.id !== id);
+        setConversations(remaining);
         if (currentConversationId === id) {
-          const remaining = conversations.filter((c) => c.id !== id);
           if (remaining.length > 0) {
-            selectConversation(remaining[0].id);
+            router.push(`/chat/${remaining[0].id}`);
           } else {
+            loadedConversationIdRef.current = null;
             setCurrentConversationId(null);
             setMessages([]);
+            router.push("/chat");
           }
         }
       }
@@ -202,7 +266,10 @@ export function ChatInterface() {
         const createData = await createRes.json();
         conversationId = createData.conversation.id;
         setCurrentConversationId(conversationId);
+        loadedConversationIdRef.current = conversationId;
         setConversations((prev) => [createData.conversation, ...prev]);
+        // Update URL to /chat/:chatId immediately without remounting or interrupting stream
+        window.history.replaceState(null, "", `/chat/${conversationId}`);
       } catch (err) {
         console.error("Failed to initiate conversation:", err);
         return;
@@ -298,10 +365,10 @@ export function ChatInterface() {
             prev.map((msg) =>
               msg.id === tempAiMsgId
                 ? {
-                    ...msg,
-                    content: msg.content + chunk,
-                    statusText: undefined,
-                  }
+                  ...msg,
+                  content: msg.content + chunk,
+                  statusText: undefined,
+                }
                 : msg
             )
           );
@@ -317,11 +384,11 @@ export function ChatInterface() {
             prev.map((msg) =>
               msg.id === tempAiMsgId
                 ? {
-                    ...msg,
-                    content: data.content || msg.content,
-                    isStreaming: false,
-                    statusText: undefined,
-                  }
+                  ...msg,
+                  content: data.content || msg.content,
+                  isStreaming: false,
+                  statusText: undefined,
+                }
                 : msg
             )
           );
@@ -347,14 +414,14 @@ export function ChatInterface() {
             prev.map((msg) =>
               msg.id === tempAiMsgId
                 ? {
-                    ...msg,
-                    content:
-                      msg.content ||
-                      data.error ||
-                      "I ran into an unexpected difficulty, but I'm here. Would you like to try again?",
-                    isStreaming: false,
-                    statusText: undefined,
-                  }
+                  ...msg,
+                  content:
+                    msg.content ||
+                    data.error ||
+                    "I ran into an unexpected difficulty, but I'm here. Would you like to try again?",
+                  isStreaming: false,
+                  statusText: undefined,
+                }
                 : msg
             )
           );
@@ -376,12 +443,12 @@ export function ChatInterface() {
           prev.map((msg) =>
             msg.id === tempAiMsgId && !msg.content
               ? {
-                  ...msg,
-                  content:
-                    "I'm here with you. If the response stream took a moment, you can refresh or send another thought whenever you're ready.",
-                  isStreaming: false,
-                  statusText: undefined,
-                }
+                ...msg,
+                content:
+                  "I'm here with you. If the response stream took a moment, you can refresh or send another thought whenever you're ready.",
+                isStreaming: false,
+                statusText: undefined,
+              }
               : { ...msg, isStreaming: false, statusText: undefined }
           )
         );
@@ -394,12 +461,12 @@ export function ChatInterface() {
         prev.map((msg) =>
           msg.id === tempAiMsgId
             ? {
-                ...msg,
-                content:
-                  "I'm sorry, I could not complete that reflection. Please make sure the service is active and try again.",
-                isStreaming: false,
-                statusText: undefined,
-              }
+              ...msg,
+              content:
+                "I'm sorry, I could not complete that reflection. Please make sure the service is active and try again.",
+              isStreaming: false,
+              statusText: undefined,
+            }
             : msg
         )
       );
@@ -413,118 +480,216 @@ export function ChatInterface() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-4.5rem)] w-full overflow-hidden bg-zinc-50 dark:bg-zinc-950 font-sans">
+    <div className="relative flex h-full w-full overflow-hidden bg-zinc-50 dark:bg-zinc-950 font-sans">
       {/* Crisis Modal */}
       <CrisisModal isOpen={isCrisisModalOpen} onClose={() => setIsCrisisModalOpen(false)} />
 
+      {/* Mobile Drawer Backdrop */}
+      {isSidebarOpen && (
+        <div
+          onClick={() => setIsSidebarOpen(false)}
+          className="fixed inset-0 z-30 bg-black/40 backdrop-blur-xs transition-opacity md:hidden"
+          aria-hidden="true"
+        />
+      )}
+
       {/* Sidebar: Conversation Sessions */}
-      <aside className="hidden md:flex w-72 flex-col border-r border-zinc-200/80 bg-white/70 backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-900/60">
-        {/* Sidebar Header */}
-        <div className="p-4 border-b border-zinc-200/80 dark:border-zinc-800/80 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-600 text-white shadow-sm">
-              <Heart className="h-4 w-4" />
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 flex h-full flex-col border-r border-zinc-200/80 bg-white/95 backdrop-blur-md transition-all duration-300 ease-in-out dark:border-zinc-800/80 dark:bg-zinc-900/95 md:relative md:z-30 md:bg-white/70 md:dark:bg-zinc-900/60 ${isSidebarOpen
+          ? "w-72 translate-x-0"
+          : "-translate-x-full md:translate-x-0 md:w-16"
+          }`}
+      >
+        {/* Expanded Sidebar Content */}
+        <div
+          className={`flex h-full w-72 flex-col justify-between transition-opacity duration-200 ${isSidebarOpen ? "opacity-100" : "hidden opacity-0 pointer-events-none"
+            }`}
+        >
+          {/* Upper section: Header + Conversation List */}
+          <div className="flex flex-1 flex-col overflow-hidden">
+            {/* Sidebar Header */}
+            <div className="p-4 border-b border-zinc-200/80 dark:border-zinc-800/80 flex items-center justify-between shrink-0">
+              <Link
+                href="/"
+                className="flex items-center gap-2 group hover:opacity-85 transition-opacity"
+                title="Go to Home"
+              >
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-600 text-white shadow-sm group-hover:scale-105 transition-transform">
+                  <Heart className="h-4 w-4" />
+                </div>
+                <span className="text-sm font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                  Rewire
+                </span>
+              </Link>
+
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={handleCreateNewConversation}
+                  className="flex items-center gap-1 rounded-lg bg-teal-50 px-2.5 py-1.5 text-xs font-semibold text-teal-700 hover:bg-teal-100 dark:bg-teal-950/60 dark:text-teal-300 dark:hover:bg-teal-900 transition-colors cursor-pointer"
+                  title="Start new reflection session"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  <span>New</span>
+                </button>
+
+                <button
+                  onClick={() => setIsSidebarOpen(false)}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-200 transition-colors cursor-pointer"
+                  title="Collapse sidebar"
+                  aria-label="Collapse sidebar"
+                >
+                  <PanelLeftClose className="h-4 w-4" />
+                </button>
+              </div>
             </div>
-            <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-              Reflections
-            </span>
+
+            {/* Conversations List */}
+            <div className="flex-1 overflow-y-auto p-3 space-y-1.5">
+              {conversations.length === 0 ? (
+                <div className="p-4 text-center text-xs text-zinc-400 dark:text-zinc-500">
+                  No previous conversations yet. Click &quot;New&quot; to begin your first reflection.
+                </div>
+              ) : (
+                conversations.map((conv) => {
+                  const isSelected = conv.id === currentConversationId;
+                  const preview = conv.messages?.[0]?.content || "New conversation";
+                  const time = new Date(conv.updatedAt || conv.createdAt).toLocaleDateString(undefined, {
+                    month: "short",
+                    day: "numeric",
+                  });
+
+                  return (
+                    <div
+                      key={conv.id}
+                      onClick={() => handleSelectConversation(conv.id)}
+                      className={`group relative flex cursor-pointer items-start justify-between rounded-xl p-3 text-left transition-all ${isSelected
+                        ? "bg-teal-50/90 text-teal-950 shadow-sm dark:bg-teal-950/40 dark:text-teal-100 border border-teal-200 dark:border-teal-800/50"
+                        : "hover:bg-zinc-100/80 text-zinc-700 dark:hover:bg-zinc-800/50 dark:text-zinc-300"
+                        }`}
+                    >
+                      <div className="flex items-start gap-2.5 overflow-hidden">
+                        <MessageSquare className={`h-4 w-4 shrink-0 mt-0.5 ${isSelected ? "text-teal-600 dark:text-teal-400" : "text-zinc-400"}`} />
+                        <div className="overflow-hidden">
+                          <p className="truncate text-xs font-medium leading-snug">
+                            {preview}
+                          </p>
+                          <span className="text-[10px] text-zinc-400 dark:text-zinc-500">
+                            {time}
+                          </span>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={(e) => handleDeleteConversation(conv.id, e)}
+                        className="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-rose-600 p-1 rounded transition-opacity"
+                        title="Delete session"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  );
+                })
+              )}
+            </div>
           </div>
 
-          <button
-            onClick={handleCreateNewConversation}
-            className="flex items-center gap-1 rounded-lg bg-teal-50 px-2.5 py-1.5 text-xs font-semibold text-teal-700 hover:bg-teal-100 dark:bg-teal-950/60 dark:text-teal-300 dark:hover:bg-teal-900 transition-colors"
-            title="Start new reflection session"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            <span>New</span>
-          </button>
+          {/* Lower section: Calming Quick Tools + User Profile */}
+          <div className="shrink-0 border-t border-zinc-200/80 dark:border-zinc-800/80">
+
+
+            {/* User Profile in Lower Section */}
+            <div className="p-3 border-t border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50/50 dark:bg-zinc-950/30">
+              <UserButton dropUp fullWidth />
+            </div>
+          </div>
         </div>
 
-        {/* Conversations List */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-1.5">
-          {conversations.length === 0 ? (
-            <div className="p-4 text-center text-xs text-zinc-400 dark:text-zinc-500">
-              No previous conversations yet. Click &quot;New&quot; to begin your first reflection.
-            </div>
-          ) : (
-            conversations.map((conv) => {
-              const isSelected = conv.id === currentConversationId;
-              const preview = conv.messages?.[0]?.content || "New conversation";
-              const time = new Date(conv.updatedAt || conv.createdAt).toLocaleDateString(undefined, {
-                month: "short",
-                day: "numeric",
-              });
+        {/* Collapsed Sidebar Rail (ChatGPT style) */}
+        <div
+          className={`hidden md:flex h-full w-16 flex-col justify-between items-center py-3.5 overflow-visible transition-opacity duration-200 ${!isSidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none md:hidden"
+            }`}
+        >
+          {/* Top section: Logo hover-to-expand + Actions */}
+          <div className="flex flex-col items-center gap-3 w-full">
+            {/* Logo Button: transforms to expand icon on hover */}
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="group relative flex h-10 w-10 items-center justify-center rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-all cursor-pointer"
+              title="Expand sidebar"
+              aria-label="Expand sidebar"
+            >
+              {/* Default state: Logo / Heart */}
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-tr from-teal-600 to-emerald-600 text-white shadow-sm transition-all duration-200 group-hover:scale-50 group-hover:opacity-0">
+                <Heart className="h-4 w-4" />
+              </div>
 
-              return (
-                <div
-                  key={conv.id}
-                  onClick={() => selectConversation(conv.id)}
-                  className={`group relative flex cursor-pointer items-start justify-between rounded-xl p-3 text-left transition-all ${
-                    isSelected
-                      ? "bg-teal-50/90 text-teal-950 shadow-sm dark:bg-teal-950/40 dark:text-teal-100 border border-teal-200 dark:border-teal-800/50"
-                      : "hover:bg-zinc-100/80 text-zinc-700 dark:hover:bg-zinc-800/50 dark:text-zinc-300"
-                  }`}
-                >
-                  <div className="flex items-start gap-2.5 overflow-hidden">
-                    <MessageSquare className={`h-4 w-4 shrink-0 mt-0.5 ${isSelected ? "text-teal-600 dark:text-teal-400" : "text-zinc-400"}`} />
-                    <div className="overflow-hidden">
-                      <p className="truncate text-xs font-medium leading-snug">
-                        {preview}
-                      </p>
-                      <span className="text-[10px] text-zinc-400 dark:text-zinc-500">
-                        {time}
-                      </span>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={(e) => handleDeleteConversation(conv.id, e)}
-                    className="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-rose-600 p-1 rounded transition-opacity"
-                    title="Delete session"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
+              {/* Hover state: Expand Icon */}
+              <div className="absolute inset-0 flex items-center justify-center transition-all duration-200 scale-50 opacity-0 group-hover:scale-100 group-hover:opacity-100">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-zinc-200/80 bg-white shadow-xs dark:border-zinc-700 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200">
+                  <PanelLeftOpen className="h-4 w-4" />
                 </div>
-              );
-            })
-          )}
-        </div>
+              </div>
+            </button>
 
-        {/* Sidebar Calming Quick Tools */}
-        <div className="p-3 border-t border-zinc-200/80 dark:border-zinc-800/80 space-y-2">
-          <button
-            onClick={() => setShowBreathingWidget(!showBreathingWidget)}
-            className="w-full flex items-center justify-between rounded-xl border border-teal-200/80 bg-teal-50/50 px-3 py-2 text-xs font-medium text-teal-800 hover:bg-teal-100/70 dark:border-teal-900/50 dark:bg-teal-950/30 dark:text-teal-200 transition-colors"
-          >
-            <div className="flex items-center gap-2">
-              <Wind className="h-4 w-4 text-teal-600 dark:text-teal-400" />
-              <span>Box Breathing Calm</span>
-            </div>
-            <span className="text-[10px] uppercase font-bold text-teal-600 dark:text-teal-400">
-              {showBreathingWidget ? "Hide" : "Open"}
-            </span>
-          </button>
+            <div className="h-[1px] w-7 bg-zinc-200/80 dark:bg-zinc-800/80" />
 
-          <button
-            onClick={() => setIsCrisisModalOpen(true)}
-            className="w-full flex items-center justify-between rounded-xl border border-rose-200/80 bg-rose-50/50 px-3 py-2 text-xs font-medium text-rose-800 hover:bg-rose-100/70 dark:border-rose-900/50 dark:bg-rose-950/30 dark:text-rose-200 transition-colors"
-          >
-            <div className="flex items-center gap-2">
-              <PhoneCall className="h-4 w-4 text-rose-600 dark:text-rose-400" />
-              <span>Crisis Resources (988)</span>
-            </div>
-            <span className="text-[10px] uppercase font-bold text-rose-600 dark:text-rose-400">
-              24/7
-            </span>
-          </button>
+            {/* New Reflection Button */}
+            <button
+              onClick={handleCreateNewConversation}
+              className="flex h-9 w-9 items-center justify-center rounded-xl text-zinc-600 hover:bg-teal-50 hover:text-teal-700 dark:text-zinc-400 dark:hover:bg-teal-950/50 dark:hover:text-teal-300 transition-colors cursor-pointer"
+              title="New reflection"
+              aria-label="New reflection"
+            >
+              <Plus className="h-4 w-4" />
+            </button>
+
+            {/* Reflections / History button */}
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="flex h-9 w-9 items-center justify-center rounded-xl text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 transition-colors cursor-pointer"
+              title="View reflections"
+              aria-label="View reflections"
+            >
+              <MessageSquare className="h-4 w-4" />
+            </button>
+
+            {/* Box Breathing Tool */}
+            <button
+              onClick={() => setShowBreathingWidget(!showBreathingWidget)}
+              className={`flex h-9 w-9 items-center justify-center rounded-xl transition-colors cursor-pointer ${showBreathingWidget
+                ? "bg-teal-100 text-teal-700 dark:bg-teal-950/70 dark:text-teal-300"
+                : "text-zinc-600 hover:bg-teal-50 hover:text-teal-700 dark:text-zinc-400 dark:hover:bg-teal-950/40 dark:hover:text-teal-300"
+                }`}
+              title="Box Breathing Calm"
+              aria-label="Box Breathing Calm"
+            >
+              <Wind className="h-4 w-4" />
+            </button>
+
+            {/* Crisis Hotline Tool */}
+            <button
+              onClick={() => setIsCrisisModalOpen(true)}
+              className="flex h-9 w-9 items-center justify-center rounded-xl text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+              title="Crisis Resources (988)"
+              aria-label="Crisis Resources (988)"
+            >
+              <PhoneCall className="h-4 w-4" />
+            </button>
+          </div>
+
+          {/* Bottom section: User Button Avatar (matches ChatGPT user circle at bottom) */}
+          <div className="flex items-center justify-center pt-2 relative overflow-visible">
+            <UserButton dropUp collapsed />
+          </div>
         </div>
       </aside>
 
       {/* Main Chat Area */}
       <main className="flex-1 flex flex-col h-full overflow-hidden relative">
         {/* Chat Header */}
-        <header className="h-14 border-b border-zinc-200/80 bg-white/70 px-6 backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-950/70 flex items-center justify-between z-10">
+        <header className="h-14 shrink-0 border-b border-zinc-200/80 bg-white/70 px-4 md:px-6 backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-950/70 flex items-center justify-between z-10">
           <div className="flex items-center gap-3">
+
             <div className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-teal-600 to-emerald-600 text-white shadow-sm shadow-teal-500/20">
               <Sparkles className="h-4 w-4" />
               <span className="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
@@ -539,7 +704,7 @@ export function ChatInterface() {
                   Active
                 </span>
               </h1>
-              <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-400 hidden sm:block">
                 Empathetic reflection & evidence-informed coping
               </p>
             </div>
@@ -575,7 +740,12 @@ export function ChatInterface() {
 
         {/* Messages List Area */}
         <div className="flex-1 overflow-y-auto px-4 py-6 md:px-8 space-y-6">
-          {messages.length === 0 ? (
+          {isLoading && messages.length === 0 ? (
+            <div className="flex h-full min-h-[340px] flex-col items-center justify-center gap-3 text-zinc-400">
+              <RefreshCw className="h-6 w-6 animate-spin text-teal-600 dark:text-teal-400" />
+              <p className="text-xs font-medium">Loading reflection session...</p>
+            </div>
+          ) : messages.length === 0 ? (
             /* Empty State: Warm Mental Health Welcoming */
             <div className="mx-auto max-w-2xl text-center py-10 space-y-8 animate-in fade-in duration-300">
               <div className="inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-tr from-teal-500/20 via-emerald-500/15 to-cyan-500/20 border border-teal-200 dark:border-teal-800/60 shadow-md shadow-teal-500/10">
@@ -635,11 +805,10 @@ export function ChatInterface() {
                     )}
 
                     <div
-                      className={`relative group max-w-[85%] rounded-2xl px-4 py-3.5 text-sm leading-relaxed shadow-sm transition-all ${
-                        isUser
-                          ? "bg-gradient-to-r from-teal-600 to-emerald-600 text-white rounded-br-none"
-                          : "border border-zinc-200/80 bg-white/90 text-zinc-800 dark:border-zinc-800/80 dark:bg-zinc-900/90 dark:text-zinc-100 rounded-bl-none backdrop-blur-sm"
-                      }`}
+                      className={`relative group max-w-[85%] rounded-2xl px-4 py-3.5 text-sm leading-relaxed shadow-sm transition-all ${isUser
+                        ? "bg-gradient-to-r from-teal-600 to-emerald-600 text-white rounded-br-none"
+                        : "border border-zinc-200/80 bg-white/90 text-zinc-800 dark:border-zinc-800/80 dark:bg-zinc-900/90 dark:text-zinc-100 rounded-bl-none backdrop-blur-sm"
+                        }`}
                     >
                       {/* Live status badge during generation */}
                       {msg.statusText && (
@@ -694,7 +863,7 @@ export function ChatInterface() {
         </div>
 
         {/* Chat Input Bar */}
-        <div className="border-t border-zinc-200/80 bg-white/80 p-4 backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-950/80">
+        <div className="shrink-0 border-t border-zinc-200/80 bg-white/80 p-4 backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-950/80">
           <div className="mx-auto max-w-3xl">
             {/* Active streaming status pill if processing */}
             {activeStepText && (

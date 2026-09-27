@@ -13,7 +13,7 @@ export default function SignUpPage() {
     <Suspense
       fallback={
         <div className="flex h-64 items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-purple-600" />
+          <Loader2 className="h-6 w-6 animate-spin text-teal-600" />
         </div>
       }
     >
