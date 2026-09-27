@@ -1,4 +1,6 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { TRPCReactProvider } from "@/trpc/client";
 import { JsonLd } from "@/components/seo/json-ld";
 import "./globals.css";
@@ -157,6 +159,8 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50">
         <TRPCReactProvider>{children}</TRPCReactProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
