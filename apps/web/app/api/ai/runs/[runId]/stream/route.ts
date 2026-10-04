@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@rewire/database";
 import { redis } from "@/lib/redis";
 import { AiStreamEvent } from "@rewire/types";
+import { checkRateLimit } from "@/lib/rate-limiter";
 
 export const dynamic = "force-dynamic";
 
@@ -54,6 +55,30 @@ export async function GET(
     return NextResponse.json(
       { error: "Forbidden: You do not own this conversation" },
       { status: 403 }
+    );
+  }
+
+  // 2.5. Rate limit stream reconnections (max 20 per minute per user)
+  const streamCheck = await checkRateLimit({
+    key: `ratelimit:ai:stream:${session.user.id}`,
+    limit: 20,
+    windowSeconds: 60,
+  });
+
+  if (!streamCheck.success) {
+    return NextResponse.json(
+      {
+        error: `Too many stream reconnection attempts. Please wait ${streamCheck.retryAfter} seconds.`,
+        retryAfter: streamCheck.retryAfter,
+      },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(streamCheck.retryAfter),
+          "X-RateLimit-Limit": String(streamCheck.limit),
+          "X-RateLimit-Remaining": "0",
+        },
+      }
     );
   }
 
