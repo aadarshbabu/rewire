@@ -111,17 +111,52 @@ export default function TermsPage() {
               </p>
             </div>
 
-            {/* Condition 6: Contact */}
-            <div className="space-y-2 pt-2 border-t border-zinc-200 dark:border-zinc-800">
-              <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
-                Questions or Concerns?
+            {/* Condition 6: Payments, Subscriptions & Service Fulfillment */}
+            <div className="space-y-3">
+              <h2 className="text-lg md:text-xl font-bold text-zinc-900 dark:text-zinc-100">
+                6. Payments, Billing & Fulfillment
               </h2>
               <p>
-                For legal inquiries or clarifications on these terms, contact us at:{" "}
-                <span className="font-semibold text-zinc-800 dark:text-zinc-200">
-                  legal@heyrewire.com
-                </span>
+                Rewire offers digital services, subscription tiers, and features. Payment processing is conducted securely via verified payment gateway aggregators, including <strong>Cashfree Payments</strong>. By submitting payment details, you authorize the charge for the selected plan.
               </p>
+              <ul className="space-y-1.5 pl-4 list-disc">
+                <li>
+                  <strong>Digital Delivery:</strong> Access to digital features is granted immediately upon successful payment confirmation, in accordance with our <Link href="/shipping-policy" className="text-teal-600 dark:text-teal-400 font-semibold underline">Shipping & Delivery Policy</Link>.
+                </li>
+                <li>
+                  <strong>Cancellations & Refunds:</strong> Subscriptions can be canceled at any time. Refund terms are governed by our <Link href="/refund-policy" className="text-teal-600 dark:text-teal-400 font-semibold underline">Cancellation & Refund Policy</Link>.
+                </li>
+              </ul>
+            </div>
+
+            {/* Condition 7: Operating Entity & Contact */}
+            <div className="space-y-3 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+              <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
+                7. Operating Entity & Verified Contact Information
+              </h2>
+              <p>
+                Rewire is owned and operated by <strong>Aadarsh Kumar</strong> (Individual Proprietor, India). For legal notices, billing support, or clarifications regarding these terms, please contact us directly:
+              </p>
+              <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-950/60 space-y-1.5 text-xs md:text-sm">
+                <p>
+                  <strong>Legal Entity / Proprietor:</strong> Aadarsh Kumar
+                </p>
+                <p>
+                  <strong>Mobile Number:</strong>{" "}
+                  <a href="tel:+919631526557" className="font-semibold text-teal-600 dark:text-teal-400 underline">
+                    +91 96315 26557
+                  </a>
+                </p>
+                <p>
+                  <strong>Email ID:</strong>{" "}
+                  <a href="mailto:aadarshsingh121@gmail.com" className="font-semibold text-teal-600 dark:text-teal-400 underline">
+                    aadarshsingh121@gmail.com
+                  </a>
+                </p>
+                <p>
+                  <strong>Operating Country:</strong> India
+                </p>
+              </div>
             </div>
           </section>
         </article>

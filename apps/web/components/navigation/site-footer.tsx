@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { Heart, ShieldCheck, LifeBuoy, PhoneCall } from "lucide-react";
+import { Heart, ShieldCheck, LifeBuoy, PhoneCall, Building2, Mail, Phone, Scale } from "lucide-react";
 
 export function SiteFooter() {
   return (
@@ -70,7 +70,7 @@ export function SiteFooter() {
           {/* Trust & Methodology */}
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-900 dark:text-zinc-100 mb-3">
-              About & Methodology
+              About & Support
             </h4>
             <ul className="space-y-2 text-xs">
               <li>
@@ -91,10 +91,10 @@ export function SiteFooter() {
               </li>
               <li>
                 <Link
-                  href="/about#architecture"
-                  className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+                  href="/contact"
+                  className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors font-medium text-teal-700 dark:text-teal-300"
                 >
-                  GraphRAG & AI Safety
+                  Contact Us & Support
                 </Link>
               </li>
               <li>
@@ -109,26 +109,18 @@ export function SiteFooter() {
             </ul>
           </div>
 
-          {/* Legal & Governance */}
+          {/* Legal & Compliance */}
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-900 dark:text-zinc-100 mb-3">
-              Legal & Privacy
+              Legal & Compliance
             </h4>
             <ul className="space-y-2 text-xs">
               <li>
                 <Link
-                  href="/disclaimer"
-                  className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+                  href="/legal"
+                  className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors font-medium text-zinc-900 dark:text-zinc-200"
                 >
-                  Clinical & Medical Disclaimer
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/privacy"
-                  className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
-                >
-                  Privacy Policy
+                  Legal & Merchant Info
                 </Link>
               </li>
               <li>
@@ -141,33 +133,97 @@ export function SiteFooter() {
               </li>
               <li>
                 <Link
-                  href="/disclaimer#safety"
+                  href="/privacy"
                   className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
                 >
-                  Emergency Safety Policy
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/refund-policy"
+                  className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+                >
+                  Cancellation & Refund Policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/shipping-policy"
+                  className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+                >
+                  Shipping & Delivery Policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/disclaimer"
+                  className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+                >
+                  Clinical & Medical Disclaimer
                 </Link>
               </li>
             </ul>
           </div>
         </div>
 
+        {/* Verified Merchant Identification Bar */}
+        <div className="pt-6 pb-2">
+          <div className="rounded-2xl border border-zinc-200/90 bg-zinc-50/80 p-4 text-xs text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-300">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-teal-600 shrink-0" />
+                <span>
+                  <strong>Legal Entity:</strong> Aadarsh Kumar &bull; <strong>Operating Name:</strong> Rewire
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center gap-4 text-xs">
+                <a
+                  href="tel:+919631526557"
+                  className="inline-flex items-center gap-1.5 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+                >
+                  <Phone className="h-3.5 w-3.5 text-emerald-600" />
+                  <span>+91 96315 26557</span>
+                </a>
+                <a
+                  href="mailto:aadarshsingh121@gmail.com"
+                  className="inline-flex items-center gap-1.5 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+                >
+                  <Mail className="h-3.5 w-3.5 text-rose-600" />
+                  <span>aadarshsingh121@gmail.com</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Clinical Disclaimer Callout */}
-        <div className="pt-6 pb-4">
+        <div className="pt-4 pb-4">
           <div className="rounded-2xl border border-amber-200/70 bg-amber-50/50 p-4 text-xs text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-200">
             <p className="font-semibold text-amber-800 dark:text-amber-300 mb-1 flex items-center gap-1.5">
               <LifeBuoy className="h-4 w-4" />
               Medical & Safety Disclaimer
             </p>
             <p className="text-[11px] leading-relaxed text-amber-800/90 dark:text-amber-300/80">
-              Rewire is an artificial intelligence wellness companion created for self-reflection, mindfulness, and cognitive reframing habits. Rewire does <strong>not</strong> offer medical diagnoses, psychiatric therapy, or emergency crisis care. If you are in immediate danger, experiencing acute distress, or thinking of self-harm, please dial <strong>988</strong> (USA & Canada), contact <strong>111 / 999</strong> (UK), or reach your local emergency services immediately.
+              Rewire is an artificial intelligence wellness companion created for self-reflection, mindfulness, and cognitive reframing habits. Rewire does <strong>not</strong> offer medical diagnoses, psychiatric therapy, or emergency crisis care. If you are in immediate danger, experiencing acute distress, or thinking of self-harm, please dial <strong>14416</strong> (India), <strong>988</strong> (USA & Canada), contact <strong>111 / 999</strong> (UK), or reach your local emergency services immediately.
             </p>
           </div>
         </div>
 
         {/* Bottom copyright */}
         <div className="flex flex-col sm:flex-row items-center justify-between text-[11px] text-zinc-400 dark:text-zinc-500 pt-4">
-          <p>&copy; {new Date().getFullYear()} Rewire Mental Health AI. All rights reserved.</p>
-          <p className="mt-2 sm:mt-0">Private &bull; Encrypted &bull; User-Governed</p>
+          <p>
+            &copy; {new Date().getFullYear()} Rewire. Owned and operated by <strong>Aadarsh Kumar</strong>. All rights reserved.
+          </p>
+          <div className="flex items-center gap-3 mt-2 sm:mt-0">
+            <Link href="/legal" className="hover:underline">Legal Info</Link>
+            <span>&bull;</span>
+            <Link href="/contact" className="hover:underline">Contact Support</Link>
+            <span>&bull;</span>
+            <Link href="/terms" className="hover:underline">Terms</Link>
+            <span>&bull;</span>
+            <Link href="/privacy" className="hover:underline">Privacy</Link>
+          </div>
         </div>
       </div>
     </footer>

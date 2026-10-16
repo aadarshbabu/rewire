@@ -64,6 +64,12 @@ export function SiteHeader() {
             >
               Crisis Directory
             </Link>
+            <Link
+              href="/contact"
+              className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+            >
+              Contact
+            </Link>
           </nav>
 
           {/* Action CTAs */}
@@ -152,11 +158,18 @@ export function SiteHeader() {
               Privacy Policy
             </Link>
             <Link
-              href="/terms"
+              href="/legal"
               onClick={() => setMobileMenuOpen(false)}
               className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:text-teal-600"
             >
-              Terms of Service
+              Legal & Merchant Info
+            </Link>
+            <Link
+              href="/contact"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block text-sm font-medium text-teal-600 dark:text-teal-400 font-semibold"
+            >
+              Contact Us & Support
             </Link>
           </div>
         )}
